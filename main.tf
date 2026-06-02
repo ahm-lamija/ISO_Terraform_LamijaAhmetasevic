@@ -1,8 +1,9 @@
+Evo čistog koda bez ikakvih komentara:
 
+```hcl
 provider "aws" {
   region = var.aws_region
 }
-
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -15,14 +16,16 @@ module "vpc" {
   public_subnets  = ["10.0.1.0/24", "10.0.2.0/24"]
   private_subnets = ["10.0.10.0/24", "10.0.11.0/24"]
 
+  enable_nat_gateway = true
+  single_nat_gateway = true
+
   enable_dns_hostnames = true
   enable_dns_support   = true
 }
 
-
 resource "aws_security_group" "alb_sg" {
-  name        = "alb-sg"
-  vpc_id      = module.vpc.vpc_id
+  name   = "alb-sg"
+  vpc_id = module.vpc.vpc_id
 
   ingress {
     from_port   = 80
@@ -39,10 +42,9 @@ resource "aws_security_group" "alb_sg" {
   }
 }
 
-
 resource "aws_security_group" "backend_sg" {
-  name        = "backend-sg"
-  vpc_id      = module.vpc.vpc_id
+  name   = "backend-sg"
+  vpc_id = module.vpc.vpc_id
 
   ingress {
     from_port       = 5000
@@ -59,10 +61,9 @@ resource "aws_security_group" "backend_sg" {
   }
 }
 
-
 resource "aws_security_group" "db_sg" {
-  name        = "db-sg"
-  vpc_id      = module.vpc.vpc_id
+  name   = "db-sg"
+  vpc_id = module.vpc.vpc_id
 
   ingress {
     from_port       = 3306
@@ -71,7 +72,6 @@ resource "aws_security_group" "db_sg" {
     security_groups = [aws_security_group.backend_sg.id]
   }
 }
-
 
 resource "aws_db_subnet_group" "db_subnets" {
   name       = "db-subnet-group"
@@ -91,15 +91,13 @@ resource "aws_db_instance" "mysql" {
   skip_final_snapshot    = true
 }
 
-
 resource "aws_instance" "server_1" {
   ami                         = "ami-0c101f26f147fa7fd" 
   instance_type               = "t2.micro"
-  subnet_id                   = module.vpc.public_subnets[0]
+  subnet_id                   = module.vpc.private_subnets[0]
   vpc_security_group_ids      = [aws_security_group.backend_sg.id]
-  associate_public_ip_address = true
+  associate_public_ip_address = false
 
- 
   user_data = <<-EOF
               #!/bin/bash
               dnf update -y
@@ -123,9 +121,9 @@ resource "aws_instance" "server_1" {
 resource "aws_instance" "server_2" {
   ami                         = "ami-0c101f26f147fa7fd"
   instance_type               = "t2.micro"
-  subnet_id                   = module.vpc.public_subnets[1]
+  subnet_id                   = module.vpc.private_subnets[1]
   vpc_security_group_ids      = [aws_security_group.backend_sg.id]
-  associate_public_ip_address = true
+  associate_public_ip_address = false
 
   user_data = <<-EOF
               #!/bin/bash
@@ -146,7 +144,6 @@ resource "aws_instance" "server_2" {
 
   tags = { Name = "Backend-Server-2" }
 }
-
 
 resource "aws_lb_target_group" "backend_tg" {
   name     = "backend-tg"
@@ -189,3 +186,5 @@ resource "aws_lb_listener" "front_end" {
     target_group_arn = aws_lb_target_group.backend_tg.arn
   }
 }
+
+```
