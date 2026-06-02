@@ -93,7 +93,7 @@ resource "aws_db_instance" "mysql" {
 
 
 resource "aws_instance" "server_1" {
-  ami                         = "ami-0c101f26f147fa7fd" # Amazon Linux 2023 za us-east-1
+  ami                         = "ami-0c101f26f147fa7fd" 
   instance_type               = "t2.micro"
   subnet_id                   = module.vpc.public_subnets[0]
   vpc_security_group_ids      = [aws_security_group.backend_sg.id]
