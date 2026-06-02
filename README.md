@@ -26,5 +26,5 @@ Ovaj repo sadrzi Terraform konfiguraciju za automatsko podizanje visoko dostupne
 Nakon zavrsenog procesa Terraform ce u terminalu ispisati load_balancer_dns preko kojeg je moguc pristup aplikaciji.
 
 ## Ciscenje resursa nakon testiranja
-
+Kako bi se izbjegli nezeljeni troskovi, kompletna infrastruktura se moze obrisati komandom
 terraform destroy --auto-approve
