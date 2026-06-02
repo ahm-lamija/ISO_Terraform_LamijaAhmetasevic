@@ -1,6 +1,3 @@
-Evo čistog koda bez ikakvih komentara:
-
-```hcl
 provider "aws" {
   region = var.aws_region
 }
